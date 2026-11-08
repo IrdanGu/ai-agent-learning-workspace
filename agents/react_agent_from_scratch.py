@@ -51,10 +51,29 @@ def tool_calculator(expression: str) -> str:
     except Exception as e:
         return f"Error kalkulasi: {e}"
 
+def tool_social_battery(param_str: str) -> str:
+    """
+    Mendiagnosis sisa social battery dan kebutuhan recharge me-time.
+    Format argumen (dipisah koma): small_talk, meetings_hours, unexpected_calls, crowd_hours
+    Contoh: 5, 2, 1, 3
+    """
+    try:
+        from agents.calculator_depresi import calculator_depresi
+    except ImportError:
+        from calculator_depresi import calculator_depresi
+
+    parts = [p.strip() for p in param_str.split(",") if p.strip()]
+    st = int(parts[0]) if len(parts) > 0 else 0
+    meet = int(parts[1]) if len(parts) > 1 else 0
+    calls = int(parts[2]) if len(parts) > 2 else 0
+    crowd = int(parts[3]) if len(parts) > 3 else 0
+    return calculator_depresi(st, meet, calls, crowd)
+
 # Registry tools
 TOOLS = {
     "search": tool_search,
-    "calculator": tool_calculator
+    "calculator": tool_calculator,
+    "social_battery": tool_social_battery
 }
 
 # ==============================================================================
@@ -66,6 +85,7 @@ REACT_SYSTEM_PROMPT = """Selesaikan pertanyaan berikut dengan menggunakan pola T
 Tools yang tersedia:
 - search[query]: Mencari informasi faktual dari database pengetahuan.
 - calculator[ekspresi]: Menghitung operasi matematika dasar.
+- social_battery[small_talk, meetings, calls, crowd]: Menghitung sisa energi sosial & waktu me-time recharging.
 - finish[jawaban]: Gunakan ini setelah kamu yakin memiliki jawaban final untuk pengguna.
 
 Format yang HARUS diikuti:

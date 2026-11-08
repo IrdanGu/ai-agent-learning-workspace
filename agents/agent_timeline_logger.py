@@ -2,6 +2,10 @@ import os
 import json
 from dotenv import load_dotenv
 from openai import OpenAI
+try:
+    from agents.calculator_depresi import calculator_depresi
+except ImportError:
+    from calculator_depresi import calculator_depresi
 
 load_dotenv()
 api_key = os.getenv("OPENROUTER_API_KEY")
@@ -13,6 +17,7 @@ client = OpenAI(
 
 # File tempat menyimpan seluruh riwayat percakapan & respon
 LOG_FILE = "conversation_timeline.json"
+
 
 def log_timeline(step_name: str, current_messages: list, api_response=None):
     """
@@ -81,6 +86,36 @@ tools = [
                 "required": ["city"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculator_depresi",
+            "description": "Kalkulator Depresiasi Social Battery & Recharging Engine Menghitung konsumsi energi sosial dan estimasi waktu isolasi/pemulihan mandiri.",
+            "parameters": {
+                "type": "object",
+                # argumen (small_talk_count: int, meetings_hours: int, unexpected_calls: int, crowd_hours: int) -> str:
+                "properties": {
+                    "small_talk_count": {
+                        "type": "integer",
+                        "description": "Jumlah basa-basi canggung / small talk min_val:0, max_val:30"
+                    },
+                    "meetings_hours": {
+                        "type": "integer",
+                        "description": "Durasi meeting / diskusi formal (jam) min_val:0, max_val:12"
+                    },
+                    "unexpected_calls": {
+                        "type": "integer",
+                        "description": "Jumlah panggilan telepon / video mendadak min_val:0, max_val:10"
+                    },
+                    "crowd_hours": {
+                        "type": "integer",
+                        "description": "Waktu berada di kerumunan publik (jam) min_val:0, max_val:12"
+                    }
+
+                }
+            }
+        }
     }
 ]
 
@@ -91,7 +126,9 @@ if os.path.exists(LOG_FILE):
 # 3. Pesan Awal dari User
 messages = [
     {"role": "user", "content": "Bagaimana kondisi cuaca di jakarta, bandung dan ciamis sekarang?"},
-    {"role": "user", "content": "bagaimana kondisi cuaca di kuningan"}
+    {"role": "user", "content": "bagaimana kondisi cuaca di kuningan"},
+    {"role": "user", "content": "haduh saya melakukan banyak sekali basa basi dengan orang baru sebanyak 10 kali dan sibuk sekali hari ini sampai metting 5 jam, berapa energi saya"}
+
 ]
 
 # Rekam Kondisi Awal
@@ -113,7 +150,7 @@ print("Finish Reason:", response.choices[0].finish_reason)
 
 if msg.tool_calls:
     print(f"\n> Langkah 2: AI meminta {len(msg.tool_calls)} pemanggilan tool!")
-    
+
     # PENTING: Masukkan pesan assistant (yang berisi permintaan tool_calls) ke riwayat
     messages.append(msg)
     log_timeline("03_SETELAH_ASSISTANT_TOOL_CALLS_DIMASUKKAN", messages)
@@ -136,6 +173,19 @@ if msg.tool_calls:
             }
             messages.append(tool_response_msg)
             log_timeline(f"04_SETELAH_TOOL_HASIL_UNTUK_{func_args['city'].upper()}", messages)
+        elif func_name == "calculator_depresi":
+            # argumen (small_talk_count: int, meetings_hours: int, unexpected_calls: int, crowd_hours: int) -> str:
+            hasil = calculator_depresi(func_args["small_talk_count"], func_args["meetings_hours"],
+                                       func_args["unexpected_calls"], func_args["crowd_hours"])
+            print(f"      -> Hasil fungsi lokal:\n {hasil}")
+
+            tool_response_msg = {
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": hasil
+            }
+            messages.append(tool_response_msg)
+            log_timeline("04_SETELAH_TOOL_HASIL_CALCULATOR_DEPRESI", messages)
 
     print("\n> Langkah 3: Mengirim seluruh riwayat percakapan + hasil tools kembali ke AI...")
     response2 = client.chat.completions.create(
@@ -147,10 +197,10 @@ if msg.tool_calls:
     messages.append(response2.choices[0].message)
     log_timeline("05_JAWABAN_AKHIR_AI", messages, api_response=response2)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("JAWABAN AKHIR AI:")
     print(response2.choices[0].message.content)
-    print("="*60)
+    print("=" * 60)
     print(f"\n[INFO] Seluruh riwayat timeline berhasil direkam ke file '{LOG_FILE}'!")
 
 else:

@@ -10,6 +10,7 @@ Repositori ini adalah lingkungan belajar dan eksperimen modular yang mencakup pe
 PyCharmMiscProject/
 ├── agents/                       # Implementasi dan eksperimen AI Agent
 │   ├── react_agent_from_scratch.py     # ReAct agent murni (Reasoning + Acting) tanpa framework
+│   ├── calculator_depresi.py           # Tool diagnosis energi baterai sosial & durasi me-time
 │   ├── tictactoe_game_agent.py         # Agent interaktif bermain Tic-Tac-Toe dengan self-correction
 │   ├── agent_timeline_logger.py        # Logging alur percakapan & tool execution ke JSON
 │   ├── native_tool_calling_agent.py    # Native Tool Calling menggunakan OpenAI Function Calling
