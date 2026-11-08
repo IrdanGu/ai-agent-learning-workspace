@@ -1,6 +1,9 @@
-from openai import OpenAI
 import os
 import sys
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()
 
 # Setup warna untuk terminal (opsional, biar keren)
 _USE_COLOR = sys.stdout.isatty() and os.getenv("NO_COLOR") is None
@@ -10,7 +13,7 @@ _RESET_COLOR = "\033[0m" if _USE_COLOR else ""
 # Konfigurasi Client ke NVIDIA NIM
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
-    api_key="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"
+    api_key=os.getenv("NVIDIA_API_KEY", "")
 )
 
 print("Sedang menghubungi NVIDIA NIM... (Model: z-ai/glm4.7)\n")
