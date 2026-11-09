@@ -9,6 +9,7 @@ Repositori ini adalah lingkungan belajar dan eksperimen modular yang mencakup pe
 ```text
 PyCharmMiscProject/
 ├── agents/                       # Implementasi dan eksperimen AI Agent
+│   ├── novita_code_interpreter_agent.py # Autonomous Code Interpreter di Novita Cloud Sandbox
 │   ├── agent_workflow_loop.py          # Siklus agen otonom (multi-turn tool calling & timeline logger)
 │   ├── react_agent_from_scratch.py     # ReAct agent murni (Reasoning + Acting) tanpa framework
 │   ├── calculator_depresi.py           # Tool diagnosis energi baterai sosial & durasi me-time
@@ -80,6 +81,10 @@ AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 
 ### 🤖 1. Agents (`agents/`)
 Fokus pada pemahaman mekanisme inti AI Agent:
+* **Novita Cloud Code Interpreter Agent:**
+  ```powershell
+  python agents/novita_code_interpreter_agent.py
+  ```
 * **Autonomous Agent Loop (Multi-Turn Tool Calling):**
   ```powershell
   python agents/agent_workflow_loop.py
